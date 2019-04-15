@@ -18,4 +18,8 @@ build_script:
   - ps: .\ci\build.ps1
 
 artifacts:
-- path: target\*
+  - path: target\x86_64-pc-windows-msvc\debug\cross-compile-sample.exe
+    name: Windows Binary
+  
+  - path: target\x86_64-unknown-linux-musl\debug\cross-compile-sample
+    name: Linux Binary
