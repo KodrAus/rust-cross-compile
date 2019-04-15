@@ -1,0 +1,21 @@
+version: '0.0.{build}'
+skip_tags: true
+image:
+- Visual Studio 2017
+test: off
+
+environment:
+  RUST_TOOLCHAIN: 'stable'
+
+init:
+  - git config --global core.longpaths true
+
+install:
+  - ps: .\ci\setup.ps1
+  - ps: $env:Path = "C:\Users\appveyor\.cargo\bin;$env:Path"
+
+  build_script:
+  - ps: .\ci\build.ps1
+
+artifacts:
+- path: target\*
