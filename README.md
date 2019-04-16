@@ -4,11 +4,11 @@ This example demonstrates how you can use just the tools that are readily access
 
 -----
 
-Rust is compiled ahead-of-time to machine code that runs directly on an end-users machine. That means you have to know the platforms you're going to target ahead-of-time and have the right build tools and libraries available for each of them upfront.
+Rust is compiled ahead-of-time to machine code that runs directly on an end-user's machine. That means you have to know upfront what platforms you're going to target and have the right build tools and libraries available for each of them.
 
 Even when you do have compiled binaries, you can run into problems distributing them if you find yourself depending on the availability of C runtime libraries on the end-user's machine.
 
-When your build environment is Windows, it turns out we can solve both our cross-compilation and distribution problems at once by statically linking MSVCRT for Windows and by cross-compiling our Linux builds to target musl instead of glibc.
+When your build environment is Windows and you also need to target Linux, it turns out we can solve both our cross-compilation and distribution problems at once by statically linking MSVCRT for Windows and by cross-compiling our Linux builds to target musl instead of glibc.
 
 Let's start with a fresh _Hello World_ Rust app:
 
@@ -19,7 +19,7 @@ cd cross-compile-sample
 
 ## Statically linking MSVCRT
 
-If we build our library for the MSVC target (which is the default for Windows) now, it'll dynamically link to the C runtime libraries:
+If we build our library for the MSVC target (which is the default for Windows) now, it'll dynamically link to MSVCRT:
 
 ```shell
 cargo build --target x86_64-pc-windows-msvc
@@ -42,7 +42,7 @@ In order to tell the Rust compiler to statically link MSVCRT, we need to add som
 rustflags = ["-C", "target-feature=+crt-static"]
 ```
 
-The [`crt-static` target feature](https://github.com/rust-lang/rfcs/blob/master/text/1721-crt-static.md) is a code generation option that's only available for targets that are suitable for either static or dynamic linkage. MSVC is one of those targets. When `crt-static` is specified, the C runtime libraries will be linked statically instead of dynamically.
+The [`crt-static` target feature](https://github.com/rust-lang/rfcs/blob/master/text/1721-crt-static.md) is a code generation option that's only available for targets that are suitable for both static and dynamic linkage. MSVC is one of those targets. When `crt-static` is specified, the C runtime libraries will be linked statically instead of dynamically.
 
 Building our app again results in a different binary:
 
@@ -64,9 +64,9 @@ It's bigger than before because we have the relevant pieces of MSVCRT included.
 
 ## Cross-compiling to Linux
 
-For Windows, we statically link MSVCRT because it's more convenient for end-users. For Linux, we statically link the musl libc because it's more convenient for us at build time (and is more portable). The convenience comes from not having to provide system libraries to dynamically link to on our Windows build environment where they're not available.
+For Windows, we statically link MSVCRT because it's more convenient for end-users. The `crt-static` feature solves our distribution problem. For Linux, we're going to statically link the [musl](https://www.musl-libc.org/intro.html) libc because it's more convenient for us at build time (and is more portable). musl is a complete, self-contained Linux libc with no system dependencies. That means we don't have to provide Linux system libraries to dynamically link to in our Windows build environment. musl solves our cross-compilation problem.
 
-[musl](https://www.musl-libc.org/intro.html) is a complete, self-contained Linux libc with no system dependencies. We can install it as a target for Rust using `rustup`:
+We can install musl as a target for Rust using `rustup`:
 
 ```shell
 rustup target add x86_64-unknown-linux-musl
@@ -83,7 +83,7 @@ error: linker `cc` not found
 error: could not compile `cross-compile-sample`
 ```
 
-We've got the runtime we need, but not the build tools to link up our final Linux binary. Well, actually we do have the build tools, we're just not using them yet. Rust [embeds LLVM's linker](https://github.com/rust-lang/rust/issues/39915), `lld`, which we can use instead of the unavailable `cc` to link our Linux binary on Windows.
+We've got the runtime we need, but not the build tools to link up our final Linux binary. Well, actually we do have the build tools we need. We're just not using them yet. Rust [embeds LLVM's linker](https://github.com/rust-lang/rust/issues/39915), `lld`, which we can use instead of the unavailable `cc` to link our Linux binary on Windows.
 
 Adding `rust-lld` as the linker for our musl target in our `./cargo/config` file will switch from `cc` to Rust's `lld`:
 
@@ -111,7 +111,7 @@ ls target/x86_64-unknown-linux-musl/debug
 ### Limitations
 
 - You can't directly or transitively depend on any libraries that need to compile C code. That includes the `failure` crate with its `backtrace` dependency. You can build some reasonably complex projects though, including [this UDP server](https://github.com/datalust/sqelf) that depends on `tokio`.
-- Binaries linked using LLD can't recover from panics (there's been [problems with LLVM's `libunwind` port in the past](https://github.com/rust-lang/rust/issues/35599)).
+- musl Binaries linked using LLD don't seem to be able to recover from panics (there's been [problems with LLVM's `libunwind` port that's used in Rust's musl target in the past](https://github.com/rust-lang/rust/issues/35599)).
 
 ### Other approaches for cross-compilation
 
