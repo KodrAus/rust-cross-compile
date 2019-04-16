@@ -1,4 +1,4 @@
-# Static linking and cross compiling Rust apps on Windows [![Build status](https://ci.appveyor.com/api/projects/status/ku7y70c7jwp8x7i8?svg=true)](https://ci.appveyor.com/project/KodrAus/cross-compile-example)
+# Statically linking and cross-compiling Rust apps on Windows [![Build status](https://ci.appveyor.com/api/projects/status/ku7y70c7jwp8x7i8?svg=true)](https://ci.appveyor.com/project/KodrAus/cross-compile-example)
 
 This example demonstrates how you can use just the tools that are readily accessible through [`rustup`](https://rustup.rs) to statically link and cross-compile Rust apps on Windows.
 
@@ -111,7 +111,7 @@ ls target/x86_64-unknown-linux-musl/debug
 ### Limitations
 
 - You can't directly or transitively depend on any libraries that need to compile C code. That includes the `failure` crate with its `backtrace` dependency. You can build some reasonably complex projects though, including [this UDP server](https://github.com/datalust/sqelf) that depends on `tokio`.
-- musl Binaries linked using LLD don't seem to be able to recover from panics (there's been [problems with LLVM's `libunwind` port that's used in Rust's musl target in the past](https://github.com/rust-lang/rust/issues/35599)).
+- musl binaries linked using LLD don't seem to be able to recover from panics (there's been [problems with LLVM's `libunwind` port that's used in Rust's musl target in the past](https://github.com/rust-lang/rust/issues/35599)).
 
 ### Other approaches for cross-compilation
 
