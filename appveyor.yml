@@ -22,4 +22,7 @@ artifacts:
     name: Windows Binary
   
   - path: target\x86_64-unknown-linux-musl\debug\cross-compile-sample
-    name: Linux Binary
+    name: Linux x86 Binary
+ 
+  - path: target\aarch64-unknown-linux-musl\debug\cross-compile-sample
+    name: Linux ARM Binary
