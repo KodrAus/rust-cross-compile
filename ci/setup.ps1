@@ -14,5 +14,6 @@ Run-Command -Exe ./rustup-init.exe -ArgumentList `
 $env:Path = "C:\Users\appveyor\.cargo\bin;$env:Path"
 
 Run-Command -Exe rustup -ArgumentList "target", "add", "x86_64-unknown-linux-musl"
+Run-Command -Exe rustup -ArgumentList "target", "add", "aarch64-unknown-linux-musl"
 
 Pop-Location
