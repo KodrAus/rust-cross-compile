@@ -35,7 +35,7 @@ Length Name
 144384 cross-compile-sample.exe
 ```
 
-In order to tell the Rust compiler to statically link MSVCRT, we need to add some configuration to a `./cargo/config` file:
+In order to tell the Rust compiler to statically link MSVCRT, we need to add some configuration to a `.cargo/config.toml` file:
 
 ```toml
 [target.x86_64-pc-windows-msvc]
@@ -85,7 +85,7 @@ error: could not compile `cross-compile-sample`
 
 We've got the runtime we need, but not the build tools to link up our final Linux binary. Well, actually we do have the build tools we need. We're just not using them yet. Rust [embeds LLVM's linker](https://github.com/rust-lang/rust/issues/39915), `lld`, which we can use instead of the unavailable `cc` to link our Linux binary on Windows.
 
-Adding `rust-lld` as the linker for our musl target in our `./cargo/config` file will switch from `cc` to Rust's `lld`:
+Adding `rust-lld` as the linker for our musl target in our `.cargo/config.toml` file will switch from `cc` to Rust's `lld`:
 
 ```toml
 [target.x86_64-unknown-linux-musl]
